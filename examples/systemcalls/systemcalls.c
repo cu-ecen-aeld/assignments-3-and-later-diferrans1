@@ -1,5 +1,11 @@
 #include "systemcalls.h"
-
+#include <stdbool.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <fcntl.h>
 /**
  * @param cmd the command to execute with system()
  * @return true if the command in @param cmd was executed
@@ -15,7 +21,12 @@ bool do_system(const char *cmd)
  *  Call the system() function with the command set in the cmd
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
-*/
+*/ 
+    int status;
+    status = system(cmd);
+    if (status == -1) {
+        return false;
+    }
 
     return true;
 }
@@ -60,8 +71,25 @@ bool do_exec(int count, ...)
 */
 
     va_end(args);
+    pid_t pid = fork();
+    if (pid == -1) {
+        return false; // fork failed
+    }
 
-    return true;
+    if (pid == 0) {
+        // Child process
+        execv(command[0], command);
+        _exit(EXIT_FAILURE); // execv only returns on failure
+    }
+
+    int status;
+    if (waitpid(pid, &status, 0) == -1) {
+        return false;
+    }
+
+    return (WIFEXITED(status) && WEXITSTATUS(status) == 0);
+
+    //return true;
 }
 
 /**
@@ -94,6 +122,34 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 */
 
     va_end(args);
+    pid_t pid = fork();
+    if (pid == -1) {
+        return false; // fork failed
+    }
 
-    return true;
+    if (pid == 0) {
+        // Child process: redirect stdout
+        int fd = open(outputfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (fd < 0) {
+            _exit(EXIT_FAILURE);
+        }
+
+        if (dup2(fd, STDOUT_FILENO) < 0) {
+            close(fd);
+            _exit(EXIT_FAILURE);
+        }
+        close(fd);
+
+        execv(command[0], command);
+        _exit(EXIT_FAILURE); // execv only returns on failure
+    }
+
+    int status;
+    if (waitpid(pid, &status, 0) == -1) {
+        return false;
+    }
+
+    return (WIFEXITED(status) && WEXITSTATUS(status) == 0);
+
+    // return true;
 }
