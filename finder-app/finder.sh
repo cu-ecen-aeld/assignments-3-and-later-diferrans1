@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 
 if [ "$#" -lt 2 ]; then
     echo "Error: parameter is missing"

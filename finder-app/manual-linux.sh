@@ -59,7 +59,7 @@ mkdir -p ${OUTDIR}/rootfs || exit 1
 cd rootfs/
 # FHS (filesystem Hierarchy standard)
 mkdir -p bin dev etc home lib lib64 proc sbin sys tmp usr var
-mkdir -p usr/bin usr/lib usr/sbin var/log
+mkdir -p usr/bin usr/lib usr/sbin var/log home/conf
 
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
