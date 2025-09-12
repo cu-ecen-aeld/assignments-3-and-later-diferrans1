@@ -8,7 +8,9 @@ set -u
 NUMFILES=10
 WRITESTR=AELD_IS_FUN
 WRITEDIR=/tmp/aeld-data
-username=$(cat conf/username.txt)
+BIN_DIR="/bin"
+APP_CONF_DIR="/etc/finder-app/conf"
+username=$(cat "$APP_CONF_DIR/username.txt")
 
 if [ $# -lt 3 ]
 then
@@ -33,7 +35,7 @@ rm -rf "${WRITEDIR}"
 
 # create $WRITEDIR if not assignment1
 # update reference of assignment
-assignment=`cat conf/assignment.txt`
+assignment=$(cat "$APP_CONF_DIR/assignment.txt")
 
 if [ $assignment != 'assignment1' ]
 then
@@ -55,16 +57,16 @@ echo "Removing the old writer utility and compiling as a native application"
 
 for i in $( seq 1 $NUMFILES)
 do
-	./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	"$BIN_DIR/writer" "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 done
 
-OUTPUTSTRING=$(./finder.sh "$WRITEDIR" "$WRITESTR")
+OUTPUTSTRING=$("$BIN_DIR/finder.sh" "$WRITEDIR" "$WRITESTR")
 
 # remove temporary directories
 rm -rf /tmp/aeld-data
 
 set +e
-echo ${OUTPUTSTRING} | grep "${MATCHSTR}"
+echo ${OUTPUTSTRING} | grep "${MATCHSTR}" > /tmp/assignment4-result.txt
 if [ $? -eq 0 ]; then
 	echo "success"
 	exit 0
