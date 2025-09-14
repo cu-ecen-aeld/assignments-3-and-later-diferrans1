@@ -1,10 +1,17 @@
 # Define the cross-compilation toolchain prefix (empty by default)
 CROSS_COMPILE ?=
 
-# If CROSS_COMPILE is empty, default to gcc; otherwise use $(CROSS_COMPILE)gcc
+# Compiler: use CROSS_COMPILE prefix if provided, else gcc
 CC := $(if $(CROSS_COMPILE),$(CROSS_COMPILE)gcc,gcc)
 
+# Target architecture (default arm64)
 ARCH ?= arm64
+
+# Compilation flags
+CFLAGS ?= -Wall -Werror
+ifeq ($(ARCH),arm64)
+    CFLAGS += -march=armv8-a
+endif
 
 # Source files
 SRCS = writer.c
@@ -15,16 +22,16 @@ OBJS = $(SRCS:.c=.o)
 # Executable name
 TARGET = writer
 
-# Default target: build the program
+# Default target
 all: $(TARGET)
 
 # Rule to build the executable
 $(TARGET): $(OBJS)
-	$(CROSS_COMPILE)gcc $(OBJS) -o $@
+	$(CC) $(CFLAGS) $(OBJS) -o $@
 
 # Rule to compile C source files
 %.o: %.c
-	$(CROSS_COMPILE)gcc -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Clean up build artifacts
 clean:
