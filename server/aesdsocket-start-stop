@@ -1,0 +1,20 @@
+#! /bin/sh
+NAME="aesdsocket"
+DAEMON_LOCATION="/usr/bin/$NAME"
+
+case "$1" in 
+  start)
+    echo "Starting aesds server"
+    start-stop-daemon -S -n $NAME -a $DAEMON_LOCATION -- -d
+    ;;
+  stop)
+    echo "stopping the server"
+    start-stop-daemon -K -n $NAME
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0
