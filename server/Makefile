@@ -1,19 +1,38 @@
-# Default architecture
+# Define the cross-compilation toolchain prefix (empty by default)
+CROSS_COMPILE ?=
+
+# Compiler: use CROSS_COMPILE prefix if provided, else gcc
+CC := $(if $(CROSS_COMPILE),$(CROSS_COMPILE)gcc,gcc)
+
+# Target architecture (default arm64)
 ARCH ?= arm64
 
-# Default cross compiler for ARM64
+# Compilation flags
+CFLAGS ?= -Wall -Werror
 ifeq ($(ARCH),arm64)
-CROSS_COMPILE ?= aarch64-none-linux-gnu-
+    CFLAGS += -march=armv8-a
 endif
 
-CC := $(CROSS_COMPILE)gcc
-CFLAGS += -g -Wall -Werror
+# Source files
+SRCS = aesdsocket.c
 
-all: aesdsocket
-default: aesdsocket
+# Object files
+OBJS = $(SRCS:.c=.o)
 
-aesdsocket: aesdsocket.c
-	$(CC) $(CFLAGS) -o $@ $^
+# Executable name
+TARGET = aesdsocket
 
+# Default target
+all: $(TARGET)
+
+# Rule to build the executable
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $@
+
+# Rule to compile C source files
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean up build artifacts
 clean:
-	rm -f aesdsocket
+	rm -f $(OBJS) $(TARGET)
