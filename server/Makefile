@@ -1,13 +1,16 @@
-CC=$(CROSS_COMPILE)gcc
-
-:aesdsocket
-
-aesdsocket: aesdsocket.o
-	$(CC) -o aesdsocket aesdsocket.o
-aesdsocket.o: aesdsocket.c
-	$(CC) -c aesdsocket.c
+CC ?= $(CROSS_COMPILE)gcc
+CFLAGS ?= -Wall -Werror
+LDFLAGS ?= 
+# Add libraries here
+LDLIBS ?= -lpthread -lrt
 
 all: aesdsocket
-	
-clean: 
+
+aesdsocket: aesdsocket.o
+	$(CC) $(LDFLAGS) -o aesdsocket aesdsocket.o $(LDLIBS)
+
+aesdsocket.o: aesdsocket.c
+	$(CC) $(CFLAGS) -c aesdsocket.c
+
+clean:
 	rm -f aesdsocket *.o
