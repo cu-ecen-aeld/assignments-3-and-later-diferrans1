@@ -32,6 +32,31 @@ struct aesd_buffer_entry *aesd_circular_buffer_find_entry_offset_for_fpos(struct
     /**
     * TODO: implement per description
     */
+    uint8_t index = buffer->out_offs;
+    size_t current_sum = 0;
+
+    // iterate the entries of the ring buffer
+    for (int i = 0; i < AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED; i++){
+        struct aesd_buffer_entry *entry = &buffer->entry[index];
+
+        // char_offset fall within the current entry?
+        if (char_offset < (current_sum + entry->size)) {
+            // Calculate the byte offset within this specific entry
+            if (entry_offset_byte_rtn != NULL) {
+                *entry_offset_byte_rtn = char_offset - current_sum;
+            }
+            return entry;
+        }
+
+        // add this entry size and move to the next index
+        current_sum += entry->size;
+        index = (index + 1) % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED;
+
+        // circle back to the write pointer and the buffer is not full, stop.
+        if (index == buffer->in_offs && !buffer->full) {
+            break;
+        }
+    }
     return NULL;
 }
 
@@ -47,6 +72,19 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
     /**
     * TODO: implement per description
     */
+   // Store the new entry at the current input offset
+   buffer->entry[buffer->in_offs] = *add_entry;
+   // Advance in the input offset wrap arround if it his the limit
+   buffer->in_offs = (buffer->in_offs + 1) % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED;
+   // check if the buffer was already full
+   if (buffer->full) {
+    buffer->out_offs = (buffer->out_offs + 1) % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED;
+   }
+
+   // Check if the buffer has become full after this write
+   if (buffer->in_offs == buffer->out_offs) {
+    buffer->full = true;
+   }
 }
 
 /**
