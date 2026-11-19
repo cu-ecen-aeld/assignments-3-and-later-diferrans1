@@ -1,0 +1,28 @@
+#!/bin/sh
+
+module=aesdchar
+device=aesdchar
+mode=664
+
+cd "$(dirname "$0")"
+set -e
+
+if grep -q '^staff:' /etc/group; then
+    group=staff
+else
+    group=wheel
+fi
+
+if [ -e ${module}.ko ]; then
+    echo "Loading ${module}.ko from local directory"
+    insmod ./${module}.ko "$@" || exit 1
+else
+    echo "${module}.ko not found locally, trying modprobe"
+    modprobe ${module} || exit 1
+fi
+
+major=$(awk "\$2==\"${module}\" {print \$1}" /proc/devices)
+rm -f /dev/${device}
+mknod /dev/${device} c "${major}" 0
+chgrp ${group} /dev/${device}
+chmod ${mode}  /dev/${device}
