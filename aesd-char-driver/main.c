@@ -168,7 +168,7 @@ long aesdchar_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
     uint8_t i;
     uint8_t idx;
 
-    if (_IOC_TYPE(cmd) != AESDCHAR_IOC_MAGIC)
+    if (_IOC_TYPE(cmd) != AESD_IOC_MAGIC)
         return -ENOTTY;
     if (_IOC_NR(cmd) > AESDCHAR_IOC_MAXNR)
         return -ENOTTY;

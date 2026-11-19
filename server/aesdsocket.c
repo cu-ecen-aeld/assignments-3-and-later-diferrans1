@@ -8,7 +8,6 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <sys/ioctl.h>
 #include "../aesd-char-driver/aesd_ioctl.h"
 
 #define DEVICE_FILE "/dev/aesdchar"
